@@ -30,8 +30,8 @@ try {
 }
 
 const template = {
-  taskId: '', // -  nanoid(),
-  title: '', // имя таска
+  taskId: '',
+  title: '',
   _isDeleted: false, // флаг удален ли таск. Физичически мы таски не удаляем, только помечаем что удален
   _createdAt: 0, // время в секундах от 1,1,1970 до момента создания таска, // read utc format ( +new Date() )
   _deletedAt: 0, // время в секундах от 1,1,1970 до момента удаление таска или null, // read utc format ( +new Date() )
@@ -41,6 +41,25 @@ const template = {
 const toWriteFile = (fileData, category) => {
   const text = JSON.stringify(fileData)
   writeFile(`${__dirname}/tasks/${category}.json`, text, { encoding: 'utf8' })
+}
+
+const toReadFile = (category) => {
+  return readFile(`${__dirname}/tasks/${category}.json`, { encoding: 'utf8' }).then((text) =>
+    JSON.parse(text)
+  )
+}
+
+const deleteSpecialFields = (field) => {
+  return field
+    .filter((item) => !item._isDeleted)
+    .map((item) => {
+      return Object.keys(item).reduce((acc, rec) => {
+        if (rec[0] !== '_') {
+          return { ...acc, [rec]: item[rec] }
+        }
+        return acc
+      }, {})
+    })
 }
 
 let connections = []
@@ -67,9 +86,9 @@ server.post('/api/v1/tasks/:category', async (req, res) => {
     title,
     _createdAt: +new Date()
   }
-  const taskList = await readFile(`${__dirname}/tasks/${category}.json`, { encoding: 'utf8' })
+  const taskList = await toReadFile(category)
     .then((file) => {
-      const list = [...JSON.parse(file), newTask]
+      const list = [...file, newTask]
       toWriteFile(list, category)
       return list
     })
@@ -80,14 +99,11 @@ server.post('/api/v1/tasks/:category', async (req, res) => {
   res.json(taskList)
 })
 
-// GET /api/v1/tasks/:category - получает все массив из фаила тасков и именем `../tasks/${category}.json`,
-// без полей, которые начинаются с нижнего подчеркивания кроме тасков с _isDeleted: true
-
 server.get('/api/v1/tasks/:category', async (req, res) => {
   const { category } = req.params
-  const data = await readFile(`${__dirname}/tasks/${category}.json`, { encoding: 'utf8' })
+  const data = await toReadFile(category)
     .then((file) =>
-      JSON.parse(file)
+      file
         .filter((task) => !task._isDeleted)
         .map((obj) => {
           return Object.keys(obj).reduce((acc, key) => {
@@ -101,6 +117,68 @@ server.get('/api/v1/tasks/:category', async (req, res) => {
     .catch(() => {
       return ['No category']
     })
+  res.json(data)
+})
+
+server.delete('/api/v1/tasks/:category/:id', async (req, res) => {
+  const { category, id } = req.params
+  const data = await toReadFile(category)
+    .then((file) =>
+      file.map((item) => {
+        return item.taskId === id ? { ...item, _isDeleted: true, _deletedAt: +new Date() } : item
+      })
+    )
+    .catch(() => {
+      res.status(404)
+      res.end()
+    })
+  toWriteFile(data, category)
+  res.json(data)
+})
+
+server.get('/api/v1/tasks/:category/:timespan', async (req, res) => {
+  const { category, timespan } = req.params
+  const period = {
+    day: 86400000,
+    week: 604800000,
+    month: 2592000000
+  }
+
+  if (Object.keys(period).indexOf(timespan) < 0) {
+    res.status(404)
+    res.end()
+  }
+  const data = await toReadFile(category)
+    .then((file) => {
+      return file.filter((task) => {
+        return task._createdAt + period[timespan] > +new Date()
+      })
+    })
+    .then((file) => deleteSpecialFields(file))
+  res.json(data)
+})
+
+server.patch('/api/v1/tasks/:category/:id', async (req, res) => {
+  const { category, id } = req.params
+  const { status } = req.body
+  const statusArray = ['done', 'new', 'in progress', 'blocked']
+  const check = statusArray.includes(status)
+  if (!check) {
+    res.status(501)
+    res.json({ status: 'error', message: 'incorrect status' })
+    res.end()
+  }
+  const data = await toReadFile(category)
+    .then((file) => {
+      return file.map((task) => {
+        return task.taskId !== id ? task : { ...task, status }
+      })
+    })
+    .catch(() => {
+      res.status(404)
+      res.end()
+    })
+  toWriteFile(data, category)
   res.json(data)
 })
 
