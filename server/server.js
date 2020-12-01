@@ -102,18 +102,7 @@ server.post('/api/v1/tasks/:category', async (req, res) => {
 server.get('/api/v1/tasks/:category', async (req, res) => {
   const { category } = req.params
   const data = await toReadFile(category)
-    .then((file) =>
-      file
-        .filter((task) => !task._isDeleted)
-        .map((obj) => {
-          return Object.keys(obj).reduce((acc, key) => {
-            if (key[0] !== '_') {
-              return { ...acc, [key]: obj[key] }
-            }
-            return acc
-          }, {})
-        })
-    )
+    .then((file) => deleteSpecialFields(file))
     .catch(() => {
       return ['No category']
     })
