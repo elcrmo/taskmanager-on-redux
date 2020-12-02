@@ -165,7 +165,8 @@
   "nodemonConfig": {
     "ignore": [
       "*.hot-update.json",
-      "server/tasks/*"
+      "server/tasks/*",
+      "client/components/*"
     ]
   },
   "husky": {
