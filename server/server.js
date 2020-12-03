@@ -149,10 +149,10 @@ server.get('/api/v1/tasks/:category/:timespan', async (req, res) => {
 
 server.patch('/api/v1/tasks/:category/:id', async (req, res) => {
   const { category, id } = req.params
-  const { status } = req.body
+  let { status, title } = req.body
   const statusArray = ['done', 'new', 'in progress', 'blocked']
   const check = statusArray.includes(status)
-  if (!check) {
+  if (status && !check) {
     res.status(501)
     res.json({ status: 'error', message: 'incorrect status' })
     res.end()
@@ -160,7 +160,16 @@ server.patch('/api/v1/tasks/:category/:id', async (req, res) => {
   const data = await toReadFile(category)
     .then((file) => {
       return file.map((task) => {
-        return task.taskId !== id ? task : { ...task, status }
+        if (task.taskId !== id) {
+          return task
+        }
+        if (typeof status === 'undefined') {
+          status = task.status
+        }
+        if (typeof title === 'undefined') {
+          title = task.title
+        }
+        return { ...task, status, title }
       })
     })
     .catch(() => {
