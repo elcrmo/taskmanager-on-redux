@@ -1,50 +1,36 @@
 import axios from 'axios'
 
 const GET_TASKS = 'GET_TASKS'
-const UPDATE_SMTH = 'UPDATE_SMTH'
 const CHANGE_STATUS = 'CHANGE_STATUS'
 const ADD_TASK = 'ADD_TASK'
 const CHANGE_TITLE = 'CHANGE_TITLE'
 const GET_TASKS_FOR_TIMESPAN = 'GET_TASKS_FOR_TIMESPAN'
+const DELETE_TASK = 'DELETE_TASK'
+const GET_CATEGORIESLIST = 'GET_CATEGORIESLIST'
 
 const initialState = {
-  listOfTasks: []
+  listOfTasks: [],
+  listOfCategories: []
 }
 
 export default (state = initialState, action) => {
   switch (action.type) {
-    case GET_TASKS: {
+    case GET_TASKS:
+    case CHANGE_STATUS:
+    case ADD_TASK:
+    case CHANGE_TITLE:
+    case GET_TASKS_FOR_TIMESPAN:
+    case DELETE_TASK: {
       return {
         ...state,
         listOfTasks: action.listOfTasks
       }
     }
-    case CHANGE_STATUS: {
+    case GET_CATEGORIESLIST: {
       return {
         ...state,
-        listOfTasks: action.changedStatus
+        listOfCategories: action.data
       }
-    }
-    case UPDATE_SMTH: {
-      return {
-        ...state,
-        listOfTasks: [...state.listOfTasks, action.new]
-      }
-    }
-    case ADD_TASK: {
-      return {
-        ...state,
-        listOfTasks: action.data.filter((item) => !item._isDeleted)
-      }
-    }
-    case CHANGE_TITLE: {
-      return {
-        ...state,
-        listOfTasks: action.data.filter((item) => !item._isDeleted)
-      }
-    }
-    case GET_TASKS_FOR_TIMESPAN: {
-      return { ...state, listOfTasks: action.data }
     }
     default:
       return state
@@ -53,8 +39,8 @@ export default (state = initialState, action) => {
 
 export function getTasks(category) {
   return (dispatch) => {
-    axios(`/api/v1/tasks/${category}`).then(({ data }) => {
-      dispatch({ type: GET_TASKS, listOfTasks: data })
+    axios(`/api/v1/tasks/${category}`).then(({ data: listOfTasks }) => {
+      dispatch({ type: GET_TASKS, listOfTasks })
     })
   }
 }
@@ -73,7 +59,7 @@ export function changeStatus(category, id, status) {
         status: 'in progress'
       }
     })
-    dispatch({ type: CHANGE_STATUS, changedStatus })
+    dispatch({ type: CHANGE_STATUS, listOfTasks: changedStatus })
   }
 }
 
@@ -85,10 +71,10 @@ export function addTask(category, title) {
       data: {
         title
       }
-    }).then(({ data }) =>
+    }).then(({ data: listOfTasks }) =>
       dispatch({
         type: ADD_TASK,
-        data
+        listOfTasks
       })
     )
   }
@@ -102,23 +88,41 @@ export function changeTitle(category, id, title) {
       data: {
         title
       }
-    }).then(({ data }) => {
-      dispatch({ type: CHANGE_TITLE, data })
+    }).then(({ data: listOfTasks }) => {
+      dispatch({ type: CHANGE_TITLE, listOfTasks })
     })
   }
 }
 
 export function getTasksForTimespan(category, timespan) {
   return (dispatch) => {
-    axios(`/api/v1/tasks/${category}/${timespan}`).then(({ data }) =>
+    axios(`/api/v1/tasks/${category}/${timespan}`).then(({ data: listOfTasks }) =>
       dispatch({
         type: GET_TASKS_FOR_TIMESPAN,
-        data
+        listOfTasks
       })
     )
   }
 }
 
-export function updateSmth() {
-  return { type: UPDATE_SMTH, new: 'blabla' }
+export function deleteTask(category, id) {
+  return (dispatch) => {
+    axios({
+      method: 'delete',
+      url: `/api/v1/tasks/${category}/${id}`
+    }).then(({ data: listOfTasks }) =>
+      dispatch({
+        type: DELETE_TASK,
+        listOfTasks
+      })
+    )
+  }
+}
+
+export function getCategories() {
+  return (dispatch) => {
+    axios(`/api/v1/categories`).then(({ data }) => {
+      dispatch({ type: GET_CATEGORIESLIST, data })
+    })
+  }
 }

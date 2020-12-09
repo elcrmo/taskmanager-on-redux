@@ -11,7 +11,7 @@ import cookieParser from 'cookie-parser'
 import config from './config'
 import Html from '../client/html'
 
-const { readFile, writeFile } = require('fs').promises
+const { readFile, writeFile, readdir } = require('fs').promises
 
 const Root = () => ''
 
@@ -62,6 +62,10 @@ const deleteSpecialFields = (field) => {
     })
 }
 
+const delFilter = (task) => {
+  return task.filter(item => !item._isDeleted)
+}
+
 let connections = []
 
 const port = process.env.PORT || 8090
@@ -76,6 +80,13 @@ const middleware = [
 ]
 
 middleware.forEach((it) => server.use(it))
+
+server.get('/api/v1/categories', async (req, res) => {
+  const data = await readdir(`${__dirname}/tasks`).then((categoryList) =>
+    categoryList.map((item) => item.slice(0, -5))
+  )
+  res.json(data)
+})
 
 server.post('/api/v1/tasks/:category', async (req, res) => {
   const { category } = req.params
@@ -96,7 +107,7 @@ server.post('/api/v1/tasks/:category', async (req, res) => {
       await toWriteFile([newTask], category)
       return [newTask]
     })
-  res.json(taskList)
+  res.json(delFilter(taskList))
 })
 
 server.get('/api/v1/tasks/:category', async (req, res) => {
@@ -122,7 +133,7 @@ server.delete('/api/v1/tasks/:category/:id', async (req, res) => {
       res.end()
     })
   toWriteFile(data, category)
-  res.json(data)
+  res.json(delFilter(data))
 })
 
 server.get('/api/v1/tasks/:category/:timespan', async (req, res) => {
@@ -177,7 +188,7 @@ server.patch('/api/v1/tasks/:category/:id', async (req, res) => {
       res.end()
     })
   toWriteFile(data, category)
-  res.json(data)
+  res.json(delFilter(data))
 })
 
 server.use('/api/', (req, res) => {

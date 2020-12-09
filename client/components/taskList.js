@@ -1,10 +1,11 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useParams } from 'react-router-dom'
 import Head from './head'
-import { getTasks, getTasksForTimespan } from '../redux/reducers/tasks'
+import { getTasks } from '../redux/reducers/tasks'
 import Task from './common/task'
 import NewTask from './common/newTask'
+import TimespanButton from './common/timespanButton'
 
 const TaskList = () => {
   const dispatch = useDispatch()
@@ -12,40 +13,26 @@ const TaskList = () => {
   const tasks = useSelector((s) => s.tasks.listOfTasks)
   useEffect(() => {
     dispatch(getTasks(category))
-  }, [])
+  }, [dispatch, category])
+
+  const timespans = ['day', 'week', 'month']
+
+  const [activeTimespan, setActiveTimespan] = useState('all')
+
   return (
     <div>
-      <Head title="TaskList" />
-      <div className="flex items-center justify-center h-screen">
-        <div className="bg-indigo-800 text-white font-bold rounded-lg border shadow-lg p-10">
-          <button
-            className="border rounded bg-blue-700 m-2"
-            type="button"
-            onClick={() => dispatch(getTasks(category))}
-          >
-            All
-          </button>
-          <button
-            className="border rounded bg-blue-700 m-2"
-            type="button"
-            onClick={() => dispatch(getTasksForTimespan(category, 'day'))}
-          >
-            Day
-          </button>
-          <button
-            className="border rounded bg-blue-700 m-2"
-            type="button"
-            onClick={() => dispatch(getTasksForTimespan(category, 'week'))}
-          >
-            Week
-          </button>
-          <button
-            className="border rounded bg-blue-700 m-2"
-            type="button"
-            onClick={() => dispatch(getTasksForTimespan(category, 'month'))}
-          >
-            Month
-          </button>
+      <Head title="Task List" />
+      <div className="bg-gray-800 flex items-center justify-center h-screen">
+        <div className="text-purple bg-gray-400 font-bold rounded-lg border shadow-lg p-10">
+          {['all', ...timespans].map((timespan) => (
+            <TimespanButton
+              category={category}
+              title={timespan}
+              key={timespan}
+              isActive={activeTimespan === timespan}
+              setActiveTimespan={setActiveTimespan}
+            />
+          ))}
           {tasks.map((item) => (
             <Task category={category} taskData={item} key={item.taskId} />
           ))}
