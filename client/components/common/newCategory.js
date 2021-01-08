@@ -40,7 +40,7 @@ const NewCategory = () => {
         />
         <button
           type="button"
-          className="py-1 border border-gray-500 placeholder-gray-5 00 text-black relative bg-white bg-white rounded text-sm transition duration-500 hover:text-white hover:bg-gray-800 shadow outline-none focus:outline-none"
+          className="py-1 border border-gray-500 placeholder-gray-5 00 text-black relative bg-white bg-white rounded text-sm  transition duration-500 hover:text-white hover:bg-gray-800 shadow outline-none focus:outline-none"
           onClick={onClick}
         >
           Add

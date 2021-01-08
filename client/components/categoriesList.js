@@ -15,7 +15,8 @@ const Category = () => {
     <div>
       <Head title="Hello" />
       <div className="flex flex-col items-center justify-center h-screen">
-        <div className="text-purple bg-gray-400 font-bold rounded-lg border shadow-lg p-10">
+        <h1 className="text-2xl font-bold">Select category:</h1>
+        <div className="flex flex-col items-center justify-center text-purple bg-white font-bold rounded-lg shadow-lg px-20 py-4">
           {categories.map((it) => {
             return (
               <div key={it} className="hover:text-red-500">
