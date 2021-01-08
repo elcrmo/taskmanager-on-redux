@@ -6,7 +6,9 @@ const TimespanButton = ({ category, title, setActiveTimespan, isActive }) => {
   const dispatch = useDispatch()
   return (
     <button
-      className={`border rounded m-2 px-2 ${isActive ? 'bg-blue-800' : 'bg-blue-500'}`}
+      className={`border border-gray-700 rounded-md px-4 py-1 m-2 transition duration-500 ease select-none hover:text-white hover:bg-gray-600 focus:outline-none ${
+        isActive ? 'bg-gray-800 text-white' : 'text-gray-700'
+      }`}
       type="button"
       onClick={() => {
         dispatch(title === 'all' ? getTasks(category) : getTasksForTimespan(category, title))

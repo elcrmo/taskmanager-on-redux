@@ -16,14 +16,6 @@ const { readFile, writeFile, readdir } = require('fs').promises
 const Root = () => ''
 
 try {
-  // eslint-disable-next-line import/no-unresolved
-  // ;(async () => {
-  //   const items = await import('../dist/assets/js/root.bundle')
-  //   console.log(JSON.stringify(items))
-
-  //   Root = (props) => <items.Root {...props} />
-  //   console.log(JSON.stringify(items.Root))
-  // })()
   console.log(Root)
 } catch (ex) {
   console.log(' run yarn build:prod to enable ssr')
@@ -32,10 +24,10 @@ try {
 const template = {
   taskId: '',
   title: '',
-  _isDeleted: false, // флаг удален ли таск. Физичически мы таски не удаляем, только помечаем что удален
-  _createdAt: 0, // время в секундах от 1,1,1970 до момента создания таска, // read utc format ( +new Date() )
-  _deletedAt: 0, // время в секундах от 1,1,1970 до момента удаление таска или null, // read utc format ( +new Date() )
-  status: 'new' // ['done', 'new', 'in progress', 'blocked'] - может быть только эти значения и никакие больше
+  _isDeleted: false,
+  _createdAt: 0,
+  _deletedAt: 0,
+  status: 'new'
 }
 
 const toWriteFile = (fileData, category) => {

@@ -56,7 +56,7 @@ export function changeStatus(category, id, status) {
       method: 'patch',
       url: `/api/v1/tasks/${category}/${id}`,
       data: {
-        status: 'in progress'
+        status
       }
     })
     dispatch({ type: CHANGE_STATUS, listOfTasks: changedStatus })

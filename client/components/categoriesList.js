@@ -2,6 +2,7 @@ import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import Head from './head'
+import NewCategory from './common/newCategory'
 import { getCategories } from '../redux/reducers/tasks'
 
 const Category = () => {
@@ -13,7 +14,7 @@ const Category = () => {
   return (
     <div>
       <Head title="Hello" />
-      <div className="bg-gray-800 flex items-center justify-center h-screen">
+      <div className="flex flex-col items-center justify-center h-screen">
         <div className="text-purple bg-gray-400 font-bold rounded-lg border shadow-lg p-10">
           {categories.map((it) => {
             return (
@@ -23,6 +24,7 @@ const Category = () => {
             )
           })}
         </div>
+        <NewCategory />
       </div>
     </div>
   )
